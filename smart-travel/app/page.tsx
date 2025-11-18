@@ -76,7 +76,7 @@ export default function Home() {
         </div>
       </section>
       <div className="relative z-30 -mt-20 w-full px-4">
-        <div className="max-w-6xl mx-auto bg-gradient-to-r from-blue-900 to-blue-800 p-6 rounded-xl shadow-lg space-y-4">
+        <div className="max-w-6xl mx-auto bg-linear-to-r from-blue-900 to-blue-800 p-6 rounded-xl shadow-lg space-y-4">
             <Search onLocationSelect={setLocation} />
             <Category 
               selectedCategories={categories}
