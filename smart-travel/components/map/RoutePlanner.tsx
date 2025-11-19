@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faCar, faBicycle, faWalking, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faCar, faBicycle, faWalking, faEdit, faSave, faRobot } from '@fortawesome/free-solid-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/components/ui/ToastProvider';
 
@@ -49,6 +49,7 @@ const RoutePlanner: React.FC<RoutePlannerProps> = ({ places = [], onWaypointEnte
 
   // Use local state for editing to avoid re-rendering the map on every drag
   const [localItems, setLocalItems] = useState<Place[]>(places);
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -192,6 +193,37 @@ const RoutePlanner: React.FC<RoutePlannerProps> = ({ places = [], onWaypointEnte
 
   // --- End Search ---
 
+  const optimizeRoute = async () => {
+    if (localItems.length < 2) {
+      addToast('Cần ít nhất 2 địa điểm để tối ưu hóa lộ trình.', 'warning');
+      return;
+    }
+
+    setIsOptimizing(true);
+    try {
+      // Build coordinates string in format: lon,lat;lon,lat;...
+      const coordinates = localItems.map(p => `${p.lon},${p.lat}`).join(';');
+      const url = `https://router.project-osrm.org/trip/v1/driving/${coordinates}?source=first&roundtrip=false&overview=full`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.code === 'Ok' && data.waypoints && data.waypoints.length > 0) {
+        // Reorder places based on waypoints returned from OSRM
+        const optimizedOrder = data.waypoints.map((wp: any) => localItems[wp.waypoint_index]);
+        setLocalItems(optimizedOrder);
+        onOrderChange(optimizedOrder);
+        addToast('Lộ trình đã được tối ưu hóa!', 'success');
+      } else {
+        addToast('Không thể tối ưu hóa lộ trình. Vui lòng thử lại.', 'danger');
+      }
+    } catch (error) {
+      console.error('Error optimizing route:', error);
+      addToast('Lỗi khi tối ưu hóa lộ trình.', 'danger');
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
 
   function addLocation() {
     setIsAdding(true);
@@ -213,10 +245,22 @@ const RoutePlanner: React.FC<RoutePlannerProps> = ({ places = [], onWaypointEnte
                     <FontAwesomeIcon icon={faWalking} className={`h-6 w-6 ${selectedVehicle === 'foot' ? 'text-blue-500' : 'text-gray-500'}`} />
                 </button>
             </div>
-            <button onClick={handleToggleEdit} className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center space-x-2">
-                <FontAwesomeIcon icon={isEditing ? faSave : faEdit} className="h-4 w-4" />
-                <span>{isEditing ? 'Lưu' : 'Sửa'}</span>
-            </button>
+            <div className="flex space-x-2">
+                {!isEditing && localItems.length > 1 && (
+                    <button 
+                        onClick={optimizeRoute}
+                        disabled={isOptimizing}
+                        className="bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-3 py-1 rounded-md text-sm flex items-center space-x-2"
+                    >
+                        <FontAwesomeIcon icon={faRobot} className="h-4 w-4" />
+                        <span>{isOptimizing ? 'Tối ưu...' : 'Tối ưu'}</span>
+                    </button>
+                )}
+                <button onClick={handleToggleEdit} className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm flex items-center space-x-2">
+                    <FontAwesomeIcon icon={isEditing ? faSave : faEdit} className="h-4 w-4" />
+                    <span>{isEditing ? 'Lưu' : 'Sửa'}</span>
+                </button>
+            </div>
         </div>
       <DndContext
         sensors={sensors}

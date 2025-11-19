@@ -6,8 +6,8 @@ import PlaceCategoryRow from './PlaceCategoryRow';
 interface Place {
   id: number;
   type: string;
-  lat: string;
-  lon: string;
+  lat: number;
+  lon: number;
   tags: {
     name?: string;
     'name:vi'?: string;

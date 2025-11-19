@@ -6,8 +6,18 @@ import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons
 
 interface Place {
   id: number;
+  lat: number;
+  lon: number;
   // Add other place properties as needed
-  tags: any;
+  tags: {
+    name?: string;
+    'name:vi'?: string;
+    "addr:street"?: string;
+    "addr:housenumber"?: string;
+    "addr:city"?: string;
+    opening_hours?: string;
+    website?: string;
+  };
 }
 
 interface PlaceCategoryRowProps {

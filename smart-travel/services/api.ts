@@ -27,6 +27,7 @@ export const searchPlaces = async (
     lat: location.lat.toString(),
     lon: location.lng.toString(),
     radius: radius,
+    size: 10,
     tags: tags,
   };
 
@@ -51,7 +52,7 @@ export const searchPlaces = async (
     }
 
     const data = await response.json();
-    return data.elements || [];
+    return data || [];
   } catch (error) {
     console.error("Failed to fetch places:", error);
     // Re-throw the error to be caught by the calling function

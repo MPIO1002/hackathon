@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SplitText from "@/components/text-animation/split-text";
 import Search from "@/components/search/search";
+import PlaceSearchBar from "@/components/search/PlaceSearchBar";
 import Category from "@/components/category/category";
 import PlacesSection from "@/components/places/PlacesSection";
 import { searchPlaces } from "@/services/api";
@@ -85,6 +86,7 @@ export default function Home() {
               onRadiusChange={setRadius}
               onSearch={handleSearch}
             />
+            <PlaceSearchBar />
         </div>
       </div>
       <div className="pb-12">

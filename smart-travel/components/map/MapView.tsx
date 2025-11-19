@@ -123,14 +123,17 @@ interface MapViewProps {
   places?: Place[];
   onRouteFetched: (data: { route: [number, number][], waypoints: any[] }) => void;
   highlightedSegment: [number, number][] | null;
+  optimizedRoute?: { geometry: string };
 }
 
-const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highlightedSegment }) => {
+const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highlightedSegment, optimizedRoute }) => {
   const [route, setRoute] = useState<[number, number][]>([]);
+  const [optimizedLineRoute, setOptimizedLineRoute] = useState<[number, number][]>([]);
   const defaultPosition: [number, number] = [10.776, 106.700]; // Saigon coordinates
   const position = places.length > 0 ? [places[0].lat, places[0].lon] : defaultPosition;
   const pathOptions = { color: 'blue', weight: 5, opacity: 0.5 };
   const highlightPathOptions = { color: 'orange', weight: 7, opacity: 1 };
+  const optimizedPathOptions = { color: 'green', weight: 6, opacity: 0.7, dashArray: '5, 5' };
 
   useEffect(() => {
     if (places.length > 1) {
@@ -154,6 +157,45 @@ const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highligh
     }
   }, [places]);
 
+  // Handle optimized route from OSRM Trip API
+  useEffect(() => {
+    if (optimizedRoute && optimizedRoute.geometry) {
+      try {
+        // Decode polyline geometry from OSRM
+        const decodedCoords = decodePolyline(optimizedRoute.geometry);
+        setOptimizedLineRoute(decodedCoords);
+      } catch (error) {
+        console.error("Error decoding optimized route:", error);
+      }
+    }
+  }, [optimizedRoute]);
+
+  // Polyline decoding function for OSRM geometry
+  const decodePolyline = (encoded: string): [number, number][] => {
+    const inv = 1.0 / 1e6;
+    const decoded: [number, number][] = [];
+    let previous = [0, 0];
+    let i = 0;
+
+    while (i < encoded.length) {
+      const ll: [number, number] = [0, 0];
+      for (let j = 0; j < 2; j++) {
+        let shift = 0;
+        let result = 0;
+        let byte = 0;
+        do {
+          byte = encoded.charCodeAt(i++) - 63;
+          result |= (byte & 0x1f) << shift;
+          shift += 5;
+        } while (byte >= 0x20);
+        ll[j] = previous[j] + (result & 1 ? ~(result >> 1) : result >> 1);
+        previous[j] = ll[j];
+      }
+      decoded.push([ll[0] * inv, ll[1] * inv]);
+    }
+    return decoded;
+  };
+
   return (
     <MapContainer
       center={position}
@@ -165,6 +207,7 @@ const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highligh
         attribution='&copy; <a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {route.length > 0 && <Polyline pathOptions={pathOptions} positions={route} />}
+      {optimizedLineRoute.length > 0 && <Polyline pathOptions={optimizedPathOptions} positions={optimizedLineRoute} />}
       {highlightedSegment && <Polyline pathOptions={highlightPathOptions} positions={highlightedSegment} />}
       {places.length > 0 ? (
         places.map(place => {
