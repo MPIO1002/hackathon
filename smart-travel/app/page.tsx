@@ -7,6 +7,7 @@ import PlaceSearchBar from "@/components/search/PlaceSearchBar";
 import Category from "@/components/category/category";
 import PlacesSection from "@/components/places/PlacesSection";
 import { searchPlaces } from "@/services/api";
+import { useSelection } from "@/context/SelectionContext";
 
 export default function Home() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -14,6 +15,7 @@ export default function Home() {
   const [radius, setRadius] = useState<number | null>(5000);
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { addStartingLocation } = useSelection();
 
   const handleCategoryChange = (category: string) => {
     setCategories(prev =>
@@ -21,6 +23,13 @@ export default function Home() {
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );
+  };
+
+  const handleLocationSelect = (selectedLocation: { lat: number; lng: number; display: string } | null) => {
+    if (selectedLocation) {
+      setLocation(selectedLocation);
+      addStartingLocation(selectedLocation);
+    }
   };
 
   const handleSearch = async () => {
@@ -78,7 +87,7 @@ export default function Home() {
       </section>
       <div className="relative z-30 -mt-20 w-full px-4">
         <div className="max-w-6xl mx-auto bg-linear-to-r from-blue-900 to-blue-800 p-6 rounded-xl shadow-lg space-y-4">
-            <Search onLocationSelect={setLocation} />
+            <Search onLocationSelect={handleLocationSelect} />
             <Category 
               selectedCategories={categories}
               onCategoryChange={handleCategoryChange}

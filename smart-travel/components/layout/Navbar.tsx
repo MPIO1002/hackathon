@@ -1,10 +1,27 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import LoginModal from '@/components/auth/LoginModal';
+import UserDropdown from '@/components/auth/UserDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const { user, logout, loading } = useAuth();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Re-render khi user thay đổi
+  useEffect(() => {
+    if (user) {
+      setIsLoginModalOpen(false);
+    }
+  }, [user]);
 
   return (
     <nav className="bg-white shadow-md w-full z-100">
@@ -22,12 +39,19 @@ const Navbar = () => {
           </div>
           <div className="flex items-center">
             <div className="hidden md:flex items-center mr-4">
-                <Link href="/login" className="text-blue-900 hover:text-blue-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                </Link>
-            </div>
+            {isClient && !loading && user ? (
+              <UserDropdown user={user} onLogout={logout} />
+            ) : (
+              <button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="text-blue-900 hover:text-blue-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+            )}
+          </div>
             <div className="md:hidden flex items-center">
               <button onClick={() => setIsOpen(!isOpen)} className="text-blue-900 hover:text-blue-700 focus:outline-none">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,6 +76,9 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </nav>
   );
 };

@@ -203,8 +203,8 @@ const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highligh
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        url="https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {route.length > 0 && <Polyline pathOptions={pathOptions} positions={route} />}
       {optimizedLineRoute.length > 0 && <Polyline pathOptions={optimizedPathOptions} positions={optimizedLineRoute} />}

@@ -49,7 +49,7 @@ const Search: React.FC<SearchProps> = ({ onLocationSelect }) => {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
-            const newLocation = { lat: latitude, lng: longitude };
+            const newLocation = { lat: latitude, lng: longitude, display: 'Vị trí hiện tại của bạn' };
             setSelectedLocation(newLocation);
             onLocationSelect(newLocation);
             fromSuggestion.current = true;
@@ -77,7 +77,7 @@ const Search: React.FC<SearchProps> = ({ onLocationSelect }) => {
         const response = await fetch(`https://maps.vietmap.vn/api/place/v4?apikey=${VIETMAP_API_KEY}&refid=${suggestion.ref_id}`);
         const data = await response.json();
         if (data && data.lat && data.lng) {
-          const newLocation = { lat: data.lat, lng: data.lng };
+          const newLocation = { lat: data.lat, lng: data.lng, display: suggestion.display};
           setSelectedLocation(newLocation);
           onLocationSelect(newLocation);
           console.log('Selected coordinates:', newLocation);
