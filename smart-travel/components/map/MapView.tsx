@@ -130,7 +130,7 @@ const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highligh
   const [route, setRoute] = useState<[number, number][]>([]);
   const [optimizedLineRoute, setOptimizedLineRoute] = useState<[number, number][]>([]);
   const defaultPosition: [number, number] = [10.776, 106.700]; // Saigon coordinates
-  const position = places.length > 0 ? [places[0].lat, places[0].lon] : defaultPosition;
+  const position: [number, number] = places.length > 0 ? [places[0].lat, places[0].lon] : defaultPosition;
   const pathOptions = { color: 'blue', weight: 5, opacity: 0.5 };
   const highlightPathOptions = { color: 'orange', weight: 7, opacity: 1 };
   const optimizedPathOptions = { color: 'green', weight: 6, opacity: 0.7, dashArray: '5, 5' };
@@ -203,8 +203,8 @@ const MapView: React.FC<MapViewProps> = ({ places = [], onRouteFetched, highligh
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        url="https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {route.length > 0 && <Polyline pathOptions={pathOptions} positions={route} />}
       {optimizedLineRoute.length > 0 && <Polyline pathOptions={optimizedPathOptions} positions={optimizedLineRoute} />}

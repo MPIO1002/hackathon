@@ -13,6 +13,7 @@ interface SelectionContextType {
   addToSelection: (place: Omit<Place, 'id'>) => void;
   removeFromSelection: (placeId: string) => void;
   updatePlacesOrder: (newOrder: Place[]) => void;
+  addStartingLocation: (location: { lat: number; lng: number; display: string }) => void;
 }
 
 const SelectionContext = createContext<SelectionContextType | undefined>(undefined);
@@ -31,6 +32,26 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const addStartingLocation = (location: { lat: number; lng: number; display: string }) => {
+    setSelectedPlaces(prevPlaces => {
+      // Remove existing starting location if any (check by id or marker)
+      const filteredPlaces = prevPlaces.filter(p => p.id !== 'starting-location');
+      
+      const startingPlace: Place = {
+        id: 'starting-location',
+        lat: location.lat,
+        lon: location.lng,
+        tags: {
+          name: location.display,
+          'name:vi': location.display,
+          'place-type': 'starting-point'
+        }
+      };
+
+      return [startingPlace, ...filteredPlaces];
+    });
+  };
+
   const removeFromSelection = (placeId: string) => {
     setSelectedPlaces(prevPlaces => prevPlaces.filter(p => p.id !== placeId));
   };
@@ -40,7 +61,7 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <SelectionContext.Provider value={{ selectedPlaces, addToSelection, removeFromSelection, updatePlacesOrder }}>
+    <SelectionContext.Provider value={{ selectedPlaces, addToSelection, removeFromSelection, updatePlacesOrder, addStartingLocation }}>
       {children}
     </SelectionContext.Provider>
   );
