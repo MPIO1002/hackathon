@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function OAuth2Redirect() {
+function OAuth2RedirectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(true);
@@ -48,5 +48,20 @@ export default function OAuth2Redirect() {
         <p className="text-gray-600">Đang xử lý đăng nhập...</p>
       </div>
     </div>
+  );
+}
+
+export default function OAuth2Redirect() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải...</p>
+        </div>
+      </div>
+    }>
+      <OAuth2RedirectContent />
+    </Suspense>
   );
 }
